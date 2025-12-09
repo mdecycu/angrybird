@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}遊戲系統{% endblock %}</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        nav {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+        }
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}">英雄榜</a>
+        {% if 'user_id' in session %}
+            <a href="{{ url_for('game') }}">開始遊戲</a>
+            <a href="{{ url_for('logout') }}">登出 ({{ session.username }})</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">登入</a>
+            <a href="{{ url_for('register') }}">註冊</a>
+        {% endif %}
+    </nav>
+
+    <div class="container">
+        {# Flash 訊息顯示區塊 #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages" style="margin-bottom: 20px;">
+                    {% for category, message in messages %}
+                        <div style="padding: 10px; border-radius: 5px; margin-bottom: 10px; 
+                            {% if category == 'success' %}
+                                background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+                            {% elif category == 'danger' or category == 'warning' %}
+                                background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+                            {% else %}
+                                background-color: #ffeeba; color: #856404; border: 1px solid #ffebcd;
+                            {% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

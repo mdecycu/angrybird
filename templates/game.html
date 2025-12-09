@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}破壞王遊戲{% endblock %}
+
+{% block head %}
+    {# 1. 引入 Brython 函式庫 #}
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.2/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.11.2/brython_stdlib.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    
+    <h2 style="text-align: center;">🎯 拖曳彈弓 → 射飛彈 → 打倒小豬！</h2>
+
+    <div style="text-align: center; margin-bottom: 15px;">
+        <p style="font-size: 1.1em; font-weight: bold;">
+            分數：<span id="score_display">0</span> |  
+            剩餘射擊次數：<span id="shots_remaining">10</span>
+        </p>
+    </div>
+
+    <div style="display: flex; justify-content: center;">
+        {# 2. 遊戲 Canvas 元素 #}
+        <canvas id="gameCanvas" width="800" height="400"
+                style="border:1px solid black; background-color: #f0fff0;"></canvas>
+    </div>
+
+    {# 3. 載入外部的 game.py 檔案 #}
+    <script type="text/python" src="{{ url_for('static', filename='game.py') }}"></script>
+    
+    {# 4. 啟動 Brython 環境 #}
+    <script type="text/javascript">
+        // 使用 setTimeout/IIFE 是最可靠的啟動方式，確保 brython() 函式已完全載入。
+        setTimeout(function() {
+            if (typeof brython === 'function') {
+                brython(1); 
+            } else {
+                console.error("Brython failed to start. Check network.");
+            }
+        }, 100); 
+    </script>
+    
+{% endblock %}
