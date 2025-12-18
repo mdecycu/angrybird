@@ -22,18 +22,20 @@ projectile = None
 sent = False
 
 # ------------------------------------------
-# 類別（完全不變）
+# 類別
 # ------------------------------------------
 class Pig:
     def __init__(self, x, y):
         self.x, self.y = x, y
         self.w, self.h = 40, 40
         self.alive = True
+
+        # 房舍相對於小豬的相對位置
         self.house_blocks = [
-            (0, 40, 120, 15),
-            (0, -10, 15, 50),
-            (105, -10, 15, 50),
-            (0, -25, 120, 15)
+            (0, 40, 120, 15),      # 地基
+            (0, -10, 15, 50),      # 左牆
+            (105, -10, 15, 50),    # 右牆
+            (0, -25, 120, 15)      # 屋頂
         ]
 
     def draw(self):
@@ -41,6 +43,7 @@ class Pig:
             ctx.fillStyle = "saddlebrown"
             for rx, ry, rw, rh in self.house_blocks:
                 ctx.fillRect(self.x + rx - 40, self.y + ry, rw, rh)
+
             ctx.drawImage(pig_img, self.x, self.y, self.w, self.h)
 
     def hit(self, px, py):
@@ -48,6 +51,7 @@ class Pig:
 
     def relocate(self, other_pigs):
         MIN_DISTANCE = 120
+
         MIN_X = 450
         MAX_X = WIDTH - self.w - 120
         MIN_Y = 200
@@ -110,8 +114,10 @@ pigs = []
 def init_level():
     global pigs
     pigs = []
+
     MIN_DISTANCE = 120
     positions = []
+
     MIN_X = 450
     MAX_X = WIDTH - 120
     MIN_Y = 200
@@ -155,30 +161,21 @@ def update_shots_remaining():
     document["shots_remaining"].text = str(MAX_SHOTS - shots_fired)
 
 
-# ============ 支援觸控的座標取得 ============
-def get_pos(evt):
-    rect = canvas.getBoundingClientRect()
-    if hasattr(evt, "changedTouches") and evt.changedTouches:
-        touch = evt.changedTouches[0]
-        return touch.clientX - rect.left, touch.clientY - rect.top
-    elif hasattr(evt, "clientX"):
-        return evt.clientX - rect.left, evt.clientY - rect.top
-    return mouse_pos
+def get_mouse_pos(evt):
+    return evt.x - canvas.offsetLeft, evt.y - canvas.offsetTop
 
 
 def mousedown(evt):
     global mouse_down, mouse_pos
     if projectile is None and shots_fired < MAX_SHOTS:
         mouse_down = True
-        mouse_pos = get_pos(evt)
-    evt.preventDefault()  # 防止長按出現選單等
+        mouse_pos = get_mouse_pos(evt)
 
 
 def mousemove(evt):
     global mouse_pos
     if mouse_down:
-        mouse_pos = get_pos(evt)
-    evt.preventDefault()
+        mouse_pos = get_mouse_pos(evt)
 
 
 def mouseup(evt):
@@ -186,31 +183,19 @@ def mouseup(evt):
     if mouse_down and projectile is None:
         current_shot_score = 0
         mouse_down = False
-        end_pos = get_pos(evt)
+        end_pos = get_mouse_pos(evt)
         dx = SLING_X - end_pos[0]
         dy = SLING_Y - end_pos[1]
         projectile = Bird(SLING_X, SLING_Y, dx * 0.25, dy * 0.25)
         shots_fired += 1
         update_shots_remaining()
-    evt.preventDefault()
 
 
-# ============ 事件綁定 ============
 canvas.bind("mousedown", mousedown)
 canvas.bind("mousemove", mousemove)
 canvas.bind("mouseup", mouseup)
 
-canvas.bind("touchstart", mousedown)
-canvas.bind("touchmove", mousemove)
-canvas.bind("touchend", mouseup)
 
-# ============ 防止手機滾動（Brython 友好方式）===========
-# 在 touch 事件處理函數內已經呼叫 evt.preventDefault()
-# 這是最簡單且在 Brython 下有效的做法
-# 不需要額外 bind prevent_scroll，也不需要 passive 參數
-
-
-# ============ 繪圖與遊戲迴圈 ============
 def draw_sling():
     ctx.strokeStyle = "black"
     ctx.lineWidth = 4
